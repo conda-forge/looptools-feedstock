@@ -32,8 +32,8 @@ outputs:
         - ./configure --prefix=$PREFIX
         - make
         - make install
-        # conda just uses $PREFIX/lib
-        - mv $PREFIX/lib64/libooptools.a $PREFIX/lib/libooptools.a  # [linux and x86]
+        # conda just uses $PREFIX/lib (x86 and ppc64le will try to use $PREFIX/lib64)
+        - mv $PREFIX/lib64/libooptools.a $PREFIX/lib/libooptools.a  # [linux and not aarch64]
         - rm -rf build
 
     requirements:
@@ -53,7 +53,7 @@ outputs:
         - {{ compiler('cxx') }}
         - gfortran
       commands:
-        - test ! -f $PREFIX/lib64/libooptools.a  # [linux and x86]
+        - test ! -f $PREFIX/lib64/libooptools.a  # [linux]
         - test -f $PREFIX/lib/libooptools.a
         - test -f $PREFIX/include/looptools.h
         - test -f $PREFIX/include/clooptools.h
