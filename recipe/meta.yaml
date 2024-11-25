@@ -22,7 +22,7 @@ outputs:
         - sed -i 's/mkdir /mkdir -p /g' makefile.in
         # FIXME: Ensure correct OS-version of strip is used for cross-compilation
         - sed -i "s|strip |$STRIP |g" makefile.in
-        # FIXME: Avoid FLDFLAGS that use $BUILD_PREFIX getting added to LDFLAGS
+        # FIXME: Avoid FLDFLAGS that use $BUILD_PREFIX getting added to LDFLAGS.
         # Avoids hard coding in specific versions of tools into paths, which in
         # the future, will be different at install time than they were at build time.
         - sed -i 's/$LDFLAGS $CONF_LDFLAGS $FLDFLAGS/$LDFLAGS $CONF_LDFLAGS -lgfortran/g' configure
@@ -73,8 +73,6 @@ outputs:
 
         # lt --help has exit code 1, so run simple program instead
         - lt 1
-        # DEBUG
-        - cat $(command -v fcc)
         - fcc --help
         - f++ --help
 
