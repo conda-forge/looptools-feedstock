@@ -22,6 +22,8 @@ outputs:
       script:
         # FIXME: Avoid error from trying to create directories that exist
         - sed -i 's/mkdir /mkdir -p /g' makefile.in
+        # FIXME: Ensure correct OS-version of strip is used for cross-compile builds.
+        - sed -i "s|strip |$STRIP |g" makefile.in
         - ./configure --help
         # FIXME: Author has disabled builds with dynamic linking
         # c.f. https://github.com/hep-packaging-coordination/packaging-hep-simulation-stack/issues/4#issuecomment-2489198926
