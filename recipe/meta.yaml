@@ -31,6 +31,14 @@ outputs:
         - ./configure --prefix=$PREFIX
         - make
         - make install
+        # FIXME: Shell script has hard coded $BUILD_PREFIX but conda-build
+        # doesn't patch that out like it does for $PREFIX. So switch
+        # $BUILD_PREFIX to $PREFIX for conda-build to patch everything as if it
+        # was $PREFIX.
+        # Note this is bad as you're now also hard coding in specific versions
+        # of tools into paths, which, in the future, will be different at
+        # install time than they were at build time.
+        - sed -i "s|$BUILD_PREFIX|$PREFIX|g" $PREFIX/bin/fcc
         # conda just uses $PREFIX/lib (x86 and ppc64le will try to use $PREFIX/lib64)
         - mv $PREFIX/lib64/libooptools.a $PREFIX/lib/libooptools.a  # [linux and not aarch64]
         - rm -rf build
@@ -63,6 +71,7 @@ outputs:
 
         # lt --help has exit code 1, so run simple program instead
         - lt 1
+        - cat $(command -v fcc)
         - fcc --help
         - f++ --help
 
