@@ -28,8 +28,9 @@ outputs:
         - ./configure --help
         # FIXME: Author has disabled builds with dynamic linking
         # c.f. https://github.com/hep-packaging-coordination/packaging-hep-simulation-stack/issues/4#issuecomment-2489198926
-        # - ./configure --prefix=$PREFIX --dynamic
-        - ./configure --prefix=$PREFIX
+        # FIXME: Set --64 flag to avoid erroring on macOS arm64 when checking for 32-bit support
+        # - ./configure --prefix=$PREFIX --64 --dynamic
+        - ./configure --prefix=$PREFIX --64
         - make
         - make install
         # conda just uses $PREFIX/lib (x86 and ppc64le will try to use $PREFIX/lib64)
