@@ -61,6 +61,8 @@ outputs:
         - test -f $PREFIX/bin/fcc
         - test -f $PREFIX/bin/f++
 
+        # lt --help has exit code 1, so run simple program instead
+        - lt 1
         - fcc --help
         - f++ --help
 
