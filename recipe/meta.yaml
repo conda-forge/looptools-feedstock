@@ -10,18 +10,25 @@ source:
   sha256: 4113467575db3a14405d62d9e516b3b90410b73ea8d20c8eb8d70a30fc5cc9cb
 
 build:
-  number: 0
+  number: 1
 
 outputs:
   - name: {{ name }}-static
 
     build:
       skip: true  # [win]
-      ignore_run_exports_from:
-        - {{ compiler('cxx') }}
       script:
         # FIXME: Avoid error from trying to create directories that exist
         - sed -i 's/mkdir /mkdir -p /g' makefile.in
+        # FIXME: Ensure correct OS-version of strip is used for cross-compilation
+        - sed -i "s|strip |$STRIP |g" makefile.in
+        # FIXME: Avoid FLDFLAGS that use $BUILD_PREFIX getting added to LDFLAGS.
+        # Avoids hard coding in specific versions of tools into paths, which in
+        # the future, will be different at install time than they were at build time.
+        - sed -i 's/$LDFLAGS $CONF_LDFLAGS $FLDFLAGS/$LDFLAGS $CONF_LDFLAGS -lgfortran/g' configure
+
+        # Get an updated config.sub and config.guess for cross-compilation
+        - cp $BUILD_PREFIX/share/gnuconfig/config.* .
         - ./configure --help
         # FIXME: Author has disabled builds with dynamic linking
         # c.f. https://github.com/hep-packaging-coordination/packaging-hep-simulation-stack/issues/4#issuecomment-2489198926
@@ -29,8 +36,13 @@ outputs:
         - ./configure --prefix=$PREFIX
         - make
         - make install
-        # conda just uses $PREFIX/lib
-        - mv $PREFIX/lib64/libooptools.a $PREFIX/lib/libooptools.a  # [linux]
+        # FIXME: Shell script has hard coded $BUILD_PREFIX but conda-build
+        # doesn't patch that out like it does for $PREFIX. So switch
+        # $BUILD_PREFIX to $PREFIX for conda-build to patch everything as if it
+        # was $PREFIX.
+        - sed -i "s|$BUILD_PREFIX|$PREFIX|g" $PREFIX/bin/fcc
+        # conda just uses $PREFIX/lib (x86 and ppc64le will try to use $PREFIX/lib64)
+        - mv $PREFIX/lib64/libooptools.a $PREFIX/lib/libooptools.a  # [linux and not aarch64]
         - rm -rf build
 
     requirements:
@@ -39,6 +51,8 @@ outputs:
         - {{ compiler('cxx') }}
         - {{ compiler('fortran') }}
         - make
+        - pkg-config
+        - gnuconfig
         - sed
         - gawk
 
@@ -57,6 +71,8 @@ outputs:
         - test -f $PREFIX/bin/fcc
         - test -f $PREFIX/bin/f++
 
+        # lt --help has exit code 1, so run simple program instead
+        - lt 1
         - fcc --help
         - f++ --help
 
