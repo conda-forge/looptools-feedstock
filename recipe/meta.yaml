@@ -17,9 +17,6 @@ outputs:
 
     build:
       skip: true  # [win]
-      ignore_run_exports_from:
-        # Need cxx compiler to build but only c compiler to run
-        - {{ compiler('cxx') }}
       script:
         # FIXME: Avoid error from trying to create directories that exist
         - sed -i 's/mkdir /mkdir -p /g' makefile.in
@@ -40,7 +37,6 @@ outputs:
     requirements:
       build:
         - {{ stdlib('c') }}
-        - {{ compiler('c') }}
         - {{ compiler('cxx') }}
         - {{ compiler('fortran') }}
         - make
