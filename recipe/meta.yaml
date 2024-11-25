@@ -32,7 +32,7 @@ outputs:
         - make
         - make install
         # conda just uses $PREFIX/lib
-        - mv $PREFIX/lib64/libooptools.a $PREFIX/lib/libooptools.a  # [linux]
+        - mv $PREFIX/lib64/libooptools.a $PREFIX/lib/libooptools.a  # [linux and x86]
         - rm -rf build
 
     requirements:
@@ -51,7 +51,7 @@ outputs:
         - {{ compiler('cxx') }}
         - gfortran
       commands:
-        - test ! -f $PREFIX/lib64/libooptools.a  # [linux]
+        - test ! -f $PREFIX/lib64/libooptools.a  # [linux and x86]
         - test -f $PREFIX/lib/libooptools.a
         - test -f $PREFIX/include/looptools.h
         - test -f $PREFIX/include/clooptools.h
