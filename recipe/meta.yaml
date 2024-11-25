@@ -22,6 +22,19 @@ outputs:
         - sed -i 's/mkdir /mkdir -p /g' makefile.in
         # FIXME: Ensure correct OS-version of strip is used for cross-compilation
         - sed -i "s|strip |$STRIP |g" makefile.in
+
+        # FIXME:
+        # In configure, 'findprog' sets values of CONF_CC and CONF_CXX. Override
+        # these in src/makefile to use PREFIX instead of BUILD_PREFIX, so that
+        # conda-build can patch the PREFIX path.
+        - export _VAR='export CONF_CC=$(echo "$CONF_CC" | sed "s|$BUILD_PREFIX|$PREFIX|g") \&\& export CONF_CXX=$(echo "$CONF_CXX" | sed "s|$BUILD_PREFIX|$PREFIX|g")'
+        - sed -i 's#sed -e#_ZZZ \&\& sed -e#g' src/makefile
+        - sed -i 's#_ZZZ#'"$_VAR"'#g' src/makefile
+        - unset _VAR
+
+        # FIXME: Avoid FLDFLAGS that use $BUILD_PREFIX gettting added to LDFLAGS
+        - sed -i 's/$LDFLAGS $CONF_LDFLAGS $FLDFLAGS/$LDFLAGS $CONF_LDFLAGS -lgfortran/g' configure
+
         # Get an updated config.sub and config.guess for cross-compilation
         - cp $BUILD_PREFIX/share/gnuconfig/config.* .
         - ./configure --help
@@ -71,6 +84,7 @@ outputs:
 
         # lt --help has exit code 1, so run simple program instead
         - lt 1
+        # DEBUG
         - cat $(command -v fcc)
         - fcc --help
         - f++ --help
