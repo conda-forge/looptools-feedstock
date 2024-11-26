@@ -29,14 +29,19 @@ outputs:
 
         # FIXME: Remove the -march flag from FFLAGS for cross-compilation
         - sed -i '149i # conda-forge patch\nexport FFLAGS=$(echo "$FFLAGS" | sed "s/-march=[^ ]* //")\n' configure  # [osx and arm64]
+        - sed -i '196i # conda-forge patch\nexport CONF_FFLAGS=$(echo "$CONF_FFLAGS" | sed "s/-march=[^ ]* //")\n' configure  # [osx and arm64]
+        - echo "cat configure"  # [osx and arm64]
+        - cat configure  # [osx and arm64]
 
         # Get an updated config.sub and config.guess for cross-compilation
         - cp $BUILD_PREFIX/share/gnuconfig/config.* .
         - ./configure --help
 
         # DEBUG: Try to find out why configure is failing on gfortran underscore test
-        - sed -i '254i \ \ echo "$CONF_CC$CONF_CFLAGS $CONF_BITS -c $test-c.c"' configure  # [osx and arm64]
-        - sed -i '256i \ \ echo "$CONF_FC$CONF_FFLAGS -o $test$CONF_EXE $test.f $test-c.o $CONF_LDFLAGS"' configure  # [osx and arm64]
+        # - sed -i '254i \ \ echo "$CONF_CC$CONF_CFLAGS $CONF_BITS -c $test-c.c"' configure  # [osx and arm64]
+        # - sed -i '256i \ \ echo "$CONF_FC$CONF_FFLAGS -o $test$CONF_EXE $test.f $test-c.o $CONF_LDFLAGS"' configure  # [osx and arm64]
+        - sed -i '260i \ \ echo "$CONF_CC$CONF_CFLAGS $CONF_BITS -c $test-c.c"' configure  # [osx and arm64]
+        - sed -i '262i \ \ echo "$CONF_FC$CONF_FFLAGS -o $test$CONF_EXE $test.f $test-c.o $CONF_LDFLAGS"' configure  # [osx and arm64]
 
         # FIXME: Author has disabled builds with dynamic linking
         # c.f. https://github.com/hep-packaging-coordination/packaging-hep-simulation-stack/issues/4#issuecomment-2489198926
