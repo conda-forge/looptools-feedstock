@@ -27,6 +27,9 @@ outputs:
         # the future, will be different at install time than they were at build time.
         - sed -i 's/$LDFLAGS $CONF_LDFLAGS $FLDFLAGS/$LDFLAGS $CONF_LDFLAGS -lgfortran/g' configure
 
+        # FIXME: Remove the -march flag from FFLAGS for cross-compilation
+        - sed -i '149i # conda-forge patch\nexport FFLAGS=$(echo "$FFLAGS" | sed "s/-march=[^ ]* //")\n' configure  # [osx and arm64]
+
         # Get an updated config.sub and config.guess for cross-compilation
         - cp $BUILD_PREFIX/share/gnuconfig/config.* .
         - ./configure --help
