@@ -28,8 +28,10 @@ outputs:
         - sed -i 's/$LDFLAGS $CONF_LDFLAGS $FLDFLAGS/$LDFLAGS $CONF_LDFLAGS -lgfortran/g' configure
 
         # FIXME: Remove the -march flag from FFLAGS for cross-compilation
-        - sed -i '149i # conda-forge patch\nexport FFLAGS=$(echo "$FFLAGS" | sed "s/-march=[^ ]* //")\n' configure  # [osx and arm64]
-        - sed -i '196i # conda-forge patch\nexport CONF_FFLAGS=$(echo "$CONF_FFLAGS" | sed "s/-march=[^ ]* //")\n' configure  # [osx and arm64]
+        # - sed -i '149i # conda-forge patch\nexport FFLAGS=$(echo "$FFLAGS" | sed "s/-march=[^ ]* //")\n' configure  # [osx and arm64]
+        # - sed -i '196i # conda-forge patch\nexport CONF_FFLAGS=$(echo "$CONF_FFLAGS" | sed "s/-march=[^ ]* //")\n' configure  # [osx and arm64]
+        - sed -i '149i export FFLAGS=$(echo "$FFLAGS" | sed "s/-march=[^ ]* //")' configure  # [osx and arm64]
+        - sed -i '196i export CONF_FFLAGS=$(echo "$CONF_FFLAGS" | sed "s/-march=[^ ]* //")' configure  # [osx and arm64]
         - echo "cat configure"  # [osx and arm64]
         - cat configure  # [osx and arm64]
 
