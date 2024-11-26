@@ -46,7 +46,7 @@ outputs:
         # - sed -i '262i \ \ echo "$CONF_FC$CONF_FFLAGS -o $test$CONF_EXE $test.f $test-c.o $CONF_LDFLAGS"' configure  # [osx and arm64]
         - sed -i '256i \ \ echo "$CONF_CC$CONF_CFLAGS $CONF_BITS -c $test-c.c"' configure  # [osx and arm64]
         - sed -i '258i \ \ echo "$CONF_FC$CONF_FFLAGS -o $test$CONF_EXE $test.f $test-c.o $CONF_LDFLAGS"' configure  # [osx and arm64]
-        - sed -i '262i ls -lhtra $test$CONF_EXE' configure  # [osx and arm64]
+        - sed -i '262i ls -lhtra $test*' configure  # [osx and arm64]
         - sed -i '263i ./$test$CONF_EXE' configure  # [osx and arm64]
         - sed -i '264i echo $?' configure  # [osx and arm64]
 
