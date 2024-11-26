@@ -81,6 +81,7 @@ outputs:
         - f++ --help
 
         - cd examples
+        - export LDFLAGS="$LDFLAGS -Wl,-no_compact_unwind"  # [osx]
         - $CXX example01.cpp -o example01 $CXXFLAGS $LDFLAGS -looptools -lgfortran
         - ./example01
 
