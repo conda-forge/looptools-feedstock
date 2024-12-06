@@ -10,7 +10,7 @@ source:
   sha256: 4113467575db3a14405d62d9e516b3b90410b73ea8d20c8eb8d70a30fc5cc9cb
 
 build:
-  number: 2
+  number: 3
 
 outputs:
   - name: {{ name }}-static
@@ -27,9 +27,34 @@ outputs:
         # the future, will be different at install time than they were at build time.
         - sed -i 's/$LDFLAGS $CONF_LDFLAGS $FLDFLAGS/$LDFLAGS $CONF_LDFLAGS -lgfortran/g' configure
 
+        # FIXME: Remove the -march flag from FFLAGS for cross-compilation
+        # - sed -i '149i # conda-forge patch\nexport FFLAGS=$(echo "$FFLAGS" | sed "s/-march=[^ ]* //")\n' configure  # [osx and arm64]
+        # - sed -i '196i # conda-forge patch\nexport CONF_FFLAGS=$(echo "$CONF_FFLAGS" | sed "s/-march=[^ ]* //")\n' configure  # [osx and arm64]
+
+        # - sed -i '149i export FFLAGS=$(echo "$FFLAGS" | sed "s/-march=[^ ]* //")' configure  # [osx and arm64]
+        # - sed -i '196i export CONF_FFLAGS=$(echo "$CONF_FFLAGS" | sed "s/-march=[^ ]* //")' configure  # [osx and arm64]
+
+        # try seeing if it is fno-stack-protector instead of march
+        - sed -i '149i export FFLAGS=$(echo "$FFLAGS" | sed "s/-fno-stack-protector/-fstack-protector/g")' configure  # [osx and arm64]
+        - sed -i '196i export CONF_FFLAGS=$(echo "$CONF_FFLAGS" | sed "s/-fno-stack-protector/-fstack-protector/g")' configure  # [osx and arm64]
+        - echo "cat configure"  # [osx and arm64]
+        - cat configure  # [osx and arm64]
+
         # Get an updated config.sub and config.guess for cross-compilation
         - cp $BUILD_PREFIX/share/gnuconfig/config.* .
         - ./configure --help
+
+        # DEBUG: Try to find out why configure is failing on gfortran underscore test
+        # - sed -i '254i \ \ echo "$CONF_CC$CONF_CFLAGS $CONF_BITS -c $test-c.c"' configure  # [osx and arm64]
+        # - sed -i '256i \ \ echo "$CONF_FC$CONF_FFLAGS -o $test$CONF_EXE $test.f $test-c.o $CONF_LDFLAGS"' configure  # [osx and arm64]
+        # - sed -i '260i \ \ echo "$CONF_CC$CONF_CFLAGS $CONF_BITS -c $test-c.c"' configure  # [osx and arm64]
+        # - sed -i '262i \ \ echo "$CONF_FC$CONF_FFLAGS -o $test$CONF_EXE $test.f $test-c.o $CONF_LDFLAGS"' configure  # [osx and arm64]
+        - sed -i '256i \ \ echo "$CONF_CC$CONF_CFLAGS $CONF_BITS -c $test-c.c"' configure  # [osx and arm64]
+        - sed -i '258i \ \ echo "$CONF_FC$CONF_FFLAGS -o $test$CONF_EXE $test.f $test-c.o $CONF_LDFLAGS"' configure  # [osx and arm64]
+        - sed -i '262i ls -lhtra $test*' configure  # [osx and arm64]
+        - sed -i '263i ./$test$CONF_EXE' configure  # [osx and arm64]
+        - sed -i '264i echo $?' configure  # [osx and arm64]
+
         # FIXME: Author has disabled builds with dynamic linking
         # c.f. https://github.com/hep-packaging-coordination/packaging-hep-simulation-stack/issues/4#issuecomment-2489198926
         # - ./configure --prefix=$PREFIX --dynamic
@@ -81,6 +106,7 @@ outputs:
         - f++ --help
 
         - cd examples
+        - export LDFLAGS="$LDFLAGS -Wl,-no_compact_unwind"  # [osx and arm64]
         - $CXX example01.cpp -o example01 $CXXFLAGS $LDFLAGS -looptools -lgfortran
         - ./example01
 
