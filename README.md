@@ -3,6 +3,29 @@ About looptools-feedstock
 
 Feedstock license: [BSD-3-Clause](https://github.com/conda-forge/looptools-feedstock/blob/main/LICENSE.txt)
 
+
+About looptools
+---------------
+
+Home: https://feynarts.de/looptools/
+
+Package license: GPL-3.0-only
+
+Summary: LoopTools: A package for evaluation of scalar and tensor one-loop integrals
+
+LoopTools is a package for evaluation of scalar and tensor one-loop integrals
+based on the FF package by G.J. van Oldenborgh. It features an easy Fortran,
+C++, and Mathematica interface to the scalar one-loop functions of FF and
+in addition provides the 2-, 3-, and 4-point tensor coefficient functions.
+
+The [publication](https://inspirehep.net/literature/474106) associated with
+LoopTools is: T. Hahn, M. Pérez-Victoria. Automated one-loop calculations
+in four and D dimensions, _Comput. Phys. Commun._ 118 (1999) 153.
+DOI: [10.1016/S0010-4655(98)00173-8](https://doi.org/10.1016/S0010-4655(98)00173-8)
+
+About looptools
+---------------
+
 Home: https://feynarts.de/looptools/
 
 Package license: GPL-3.0-only
@@ -63,6 +86,13 @@ Current build status
               <td>
                 <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=24047&branchName=main">
                   <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/looptools-feedstock?branchName=main&jobName=osx&configuration=osx%20osx_64_" alt="variant">
+                </a>
+              </td>
+            </tr><tr>
+              <td>win_64</td>
+              <td>
+                <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=24047&branchName=main">
+                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/looptools-feedstock?branchName=main&jobName=win&configuration=win%20win_64_" alt="variant">
                 </a>
               </td>
             </tr>
@@ -149,12 +179,12 @@ it is possible to build and upload installable packages to the
 [conda-forge](https://anaconda.org/conda-forge) [anaconda.org](https://anaconda.org/)
 channel for Linux, Windows and OSX respectively.
 
-To manage the continuous integration and simplify feedstock maintenance
+To manage the continuous integration and simplify feedstock maintenance,
 [conda-smithy](https://github.com/conda-forge/conda-smithy) has been developed.
 Using the ``conda-forge.yml`` within this repository, it is possible to re-render all of
 this feedstock's supporting files (e.g. the CI configuration files) with ``conda smithy rerender``.
 
-For more information please check the [conda-forge documentation](https://conda-forge.org/docs/).
+For more information, please check the [conda-forge documentation](https://conda-forge.org/docs/).
 
 Terminology
 ===========
@@ -181,7 +211,7 @@ merged, the recipe will be re-built and uploaded automatically to the
 everybody to install and use from the `conda-forge` channel.
 Note that all branches in the conda-forge/looptools-feedstock are
 immediately built and any created packages are uploaded, so PRs should be based
-on branches in forks and branches in the main repository should only be used to
+on branches in forks, and branches in the main repository should only be used to
 build distinct package versions.
 
 In order to produce a uniquely identifiable distribution:
