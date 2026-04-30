@@ -1,22 +1,24 @@
-{% set name = "looptools" %}
-{% set version = "2.16" %}
+schema_version: 1
 
-package:
-  name: {{ name }}
-  version: {{ version }}
+context:
+  version: "2.16"
+
+recipe:
+  name: "looptools"
+  version: ${{ version }}
 
 source:
-  url: https://feynarts.de/looptools/LoopTools-{{ version }}.tar.gz
+  url: https://feynarts.de/looptools/LoopTools-${{ version }}.tar.gz
   sha256: 4113467575db3a14405d62d9e516b3b90410b73ea8d20c8eb8d70a30fc5cc9cb
 
 build:
-  number: 2
+  number: 3
 
 outputs:
-  - name: {{ name }}-static
-
+  - package:
+      name: "looptools-static"
     build:
-      skip: true  # [win]
+      skip: win
       script:
         # FIXME: Avoid error from trying to create directories that exist
         - sed -i 's/mkdir /mkdir -p /g' makefile.in
@@ -26,7 +28,6 @@ outputs:
         # Avoids hard coding in specific versions of tools into paths, which in
         # the future, will be different at install time than they were at build time.
         - sed -i 's/$LDFLAGS $CONF_LDFLAGS $FLDFLAGS/$LDFLAGS $CONF_LDFLAGS -lgfortran/g' configure
-
         # Get an updated config.sub and config.guess for cross-compilation
         - cp $BUILD_PREFIX/share/gnuconfig/config.* .
         - ./configure --help
@@ -42,14 +43,14 @@ outputs:
         # was $PREFIX.
         - sed -i "s|$BUILD_PREFIX|$PREFIX|g" $PREFIX/bin/fcc
         # conda just uses $PREFIX/lib (x86 and ppc64le will try to use $PREFIX/lib64)
-        - mv $PREFIX/lib64/libooptools.a $PREFIX/lib/libooptools.a  # [linux and not aarch64]
+        - if: linux and not aarch64
+          then: mv $PREFIX/lib64/libooptools.a $PREFIX/lib/libooptools.a
         - rm -rf build
-
     requirements:
       build:
-        - {{ stdlib('c') }}
-        - {{ compiler('cxx') }}
-        - {{ compiler('fortran') }}
+        - ${{ stdlib('c') }}
+        - ${{ compiler('cxx') }}
+        - ${{ compiler('fortran') }}
         - make
         - pkg-config
         - gnuconfig
@@ -57,36 +58,43 @@ outputs:
         - gawk
       run:
         # fcc requires the existence of a C and C++ compiler to work
-        - gxx  # [linux]
-        - clangxx  # [osx]
+        - if: linux
+          then: gxx
+        - if: osx
+          then: clangxx
 
-    test:
-      files:
-        - examples/
-      requires:
-        - {{ compiler('cxx') }}
-        - gfortran
-      commands:
-        - test ! -f $PREFIX/lib64/libooptools.a  # [linux]
-        - test -f $PREFIX/lib/libooptools.a
-        - test -f $PREFIX/include/looptools.h
-        - test -f $PREFIX/include/clooptools.h
-        - test -f $PREFIX/bin/lt
-        - test -f $PREFIX/bin/fcc
-        - test -f $PREFIX/bin/f++
+    tests:
+      - package_contents:
+          strict: true
+          bin:
+            - lt
+            - fcc
+            - f++
+          include:
+            - looptools.h
+            - clooptools.h
+          files:
+            - lib/libooptools.a
+            - etc/conda/test-files/*
 
-        # lt --help has exit code 1, so run simple program instead
-        - lt 1
-        - fcc --help
-        - f++ --help
+      - files:
+          recipe:
+            - examples/
+        requirements:
+          run:
+            - ${{ compiler('cxx') }}
+            - gfortran
+        script:
+          - lt 1
+          - fcc --help
+          - f++ --help
 
-        - cd examples
-        - $CXX example01.cpp -o example01 $CXXFLAGS $LDFLAGS -looptools -lgfortran
-        - ./example01
+          - cd examples
+          - $CXX example01.cpp -o example01 $CXXFLAGS $LDFLAGS -looptools -lgfortran
+          - ./example01
 
 about:
-  home: https://feynarts.de/looptools/
-  summary: 'LoopTools: A package for evaluation of scalar and tensor one-loop integrals'
+  summary: "LoopTools: A package for evaluation of scalar and tensor one-loop integrals"
   description: |
     LoopTools is a package for evaluation of scalar and tensor one-loop integrals
     based on the FF package by G.J. van Oldenborgh. It features an easy Fortran,
@@ -98,9 +106,10 @@ about:
     in four and D dimensions, _Comput. Phys. Commun._ 118 (1999) 153.
     DOI: [10.1016/S0010-4655(98)00173-8](https://doi.org/10.1016/S0010-4655(98)00173-8)
   license: GPL-3.0-only
-  license_family: GPL
   license_file: COPYING
+  homepage: https://feynarts.de/looptools/
 
 extra:
+  feedstock-name: looptools
   recipe-maintainers:
     - matthewfeickert
