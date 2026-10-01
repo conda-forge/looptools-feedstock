@@ -1,0 +1,56 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Matthew Feickert <matthew.feickert@cern.ch>
+Date: Thu, 1 Oct 2026 17:49:41 -0600
+Subject: [PATCH] Pass all five-point arguments from the complex to the real
+ routines
+
+EgetC, EputC, and E0nocacheC hand over to Eget, Eput, and E0nocache when
+all of the masses are real, but call them with the argument list of the
+four-point functions. The missing arguments are then read from invalid
+memory, which gives a segmentation fault. This is hit by the five-point
+functions for complex parameters (E0iC, EgetC, ...) when given real
+masses, and by the lt command-line interface for any five-point input.
+---
+ src/E/Eget.F | 15 +++++++++------
+ 1 file changed, 9 insertions(+), 6 deletions(-)
+
+diff --git a/src/E/Eget.F b/src/E/Eget.F
+index 7836095..8a43e18 100644
+--- a/src/E/Eget.F
++++ b/src/E/Eget.F
+@@ -74,8 +74,9 @@
+      &    print *, "Complex momenta not implemented"
+ 	if( abs(Im(m1)) + abs(Im(m2)) +
+      &      abs(Im(m3)) + abs(Im(m4)) + abs(Im(m5)) .eq. 0 ) then
+-	  XEget = Eget(p1, p2, p3, p4, p1p2, p2p3,
+-     &      m1, m2, m3, m4) - offsetC
++	  XEget = Eget(p1, p2, p3, p4, p5,
++     &      p1p2, p2p3, p3p4, p4p5, p5p1,
++     &      m1, m2, m3, m4, m5) - offsetC
+ 	  return
+ 	endif
+ #endif
+@@ -110,8 +111,9 @@
+      &    print *, "Complex momenta not implemented"
+ 	if( abs(Im(m1)) + abs(Im(m2)) +
+      &      abs(Im(m3)) + abs(Im(m4)) + abs(Im(m5)) .eq. 0 ) then
+-	  call Eput(res, p1, p2, p3, p4, p1p2, p2p3,
+-     &      m1, m2, m3, m4)
++	  call Eput(res, p1, p2, p3, p4, p5,
++     &      p1p2, p2p3, p3p4, p4p5, p5p1,
++     &      m1, m2, m3, m4, m5)
+ 	  return
+ 	endif
+ #endif
+@@ -146,8 +148,9 @@
+      &    print *, "Complex momenta not implemented"
+ 	if( abs(Im(m1)) + abs(Im(m2)) +
+      &      abs(Im(m3)) + abs(Im(m4)) + abs(Im(m5)) .eq. 0 ) then
+-	  call E0nocache(res, p1, p2, p3, p4, p1p2, p2p3,
+-     &      m1, m2, m3, m4)
++	  call E0nocache(res, p1, p2, p3, p4, p5,
++     &      p1p2, p2p3, p3p4, p4p5, p5p1,
++     &      m1, m2, m3, m4, m5)
+ 	  return
+ 	endif
+ #endif

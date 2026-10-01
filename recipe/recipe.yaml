@@ -10,52 +10,39 @@ recipe:
 source:
   url: https://feynarts.de/looptools/LoopTools-${{ version }}.tar.gz
   sha256: 4113467575db3a14405d62d9e516b3b90410b73ea8d20c8eb8d70a30fc5cc9cb
+  patches:
+    - use-STRIP-from-the-environment.patch
+    - link-the-Fortran-runtime-by-name.patch
+    - link-the-REAL-16-check-with-LDFLAGS.patch
+    - pass-all-five-point-arguments-from-EgetC.patch
 
 build:
-  number: 5
+  number: 6
+  skip: win
 
 outputs:
   - package:
       name: "looptools-static"
     build:
-      skip: win
       script:
-        # FIXME: Avoid error from trying to create directories that exist
-        - sed -i 's/mkdir /mkdir -p /g' makefile.in
-        # FIXME: Ensure correct OS-version of strip is used for cross-compilation
-        - sed -i "s|strip |$STRIP |g" makefile.in
-        # FIXME: Avoid FLDFLAGS that use $BUILD_PREFIX getting added to LDFLAGS.
-        # Avoids hard coding in specific versions of tools into paths, which in
-        # the future, will be different at install time than they were at build time.
-        - sed -i 's/$LDFLAGS $CONF_LDFLAGS $FLDFLAGS/$LDFLAGS $CONF_LDFLAGS -lgfortran/g' configure
-        # Get an updated config.sub and config.guess for cross-compilation
-        - cp $BUILD_PREFIX/share/gnuconfig/config.* .
         - ./configure --help
-        # FIXME: Author has disabled builds with dynamic linking
+        # Author has disabled builds with dynamic linking
         # c.f. https://github.com/hep-packaging-coordination/packaging-hep-simulation-stack/issues/4#issuecomment-2489198926
-        # - ./configure --prefix=$PREFIX --dynamic
         - ./configure --prefix=$PREFIX
-        - make
-        - make install
-        # FIXME: Shell script has hard coded $BUILD_PREFIX but conda-build
-        # doesn't patch that out like it does for $PREFIX. So switch
-        # $BUILD_PREFIX to $PREFIX for conda-build to patch everything as if it
-        # was $PREFIX.
+        # configure sets PARALLEL to use every core on the machine and
+        # LIBDIRSUFFIX to install to $PREFIX/lib64 on x86_64 and ppc64le
+        - make install PARALLEL="-j${CPU_COUNT}" LIBDIRSUFFIX=
+        # The compilers fcc calls are run requirements, so are found under $PREFIX
+        # and not $BUILD_PREFIX at install time.
         - sed -i "s|$BUILD_PREFIX|$PREFIX|g" $PREFIX/bin/fcc
-        # conda just uses $PREFIX/lib (x86 and ppc64le will try to use $PREFIX/lib64)
-        - if: linux and not aarch64
-          then: mv $PREFIX/lib64/libooptools.a $PREFIX/lib/libooptools.a
-        - rm -rf build
     requirements:
       build:
         - ${{ stdlib('c') }}
+        - ${{ compiler('c') }}
         - ${{ compiler('cxx') }}
         - ${{ compiler('fortran') }}
         - make
-        - pkg-config
-        - gnuconfig
         - sed
-        - gawk
       run:
         # fcc requires the existence of a C and C++ compiler to work
         - if: linux
@@ -80,18 +67,34 @@ outputs:
       - files:
           recipe:
             - examples/
-        requirements:
-          run:
-            - ${{ compiler('cxx') }}
-            - gfortran
         script:
           - lt 1
+          # The three-, four-, and five-point tensor coefficients use REAL*16
+          - lt 1000 2000 9000 100 200 300
+          - lt 100 200 300 400 5000 -2000 10 20 30 40
+          - lt 0 0 0 0 0 250000 -12239.172 150000 25000 -31183.285 10000 10000 10000 10000 10000
+          # configure falls back to double precision without an error if its
+          # check for REAL*16 fails
+          - grep -e "-DQUADSIZE=16" $PREFIX/bin/fcc
           - fcc --help
           - f++ --help
+
+          # The compilers in the run requirements do not set any environment
+          # variables on activation
+          - export CXX=${{ "g++" if linux else "clang++" }}
+          - export CXXFLAGS="-I$PREFIX/include"
+          - export LDFLAGS="-L$PREFIX/lib -Wl,-rpath,$PREFIX/lib"
 
           - cd examples
           - $CXX example01.cpp -o example01 $CXXFLAGS $LDFLAGS -looptools -lgfortran
           - ./example01
+          - fcc example01.cpp -o example01-fcc -looptools
+          - ./example01-fcc
+          - fcc example02.c -o example02 -looptools
+          - ./example02
+          # libooptools.a is linked into shared libraries by downstream packages,
+          # so it must be position independent
+          - $CXX -shared -fPIC example01.cpp -o libexample01.so $CXXFLAGS $LDFLAGS -looptools -lgfortran
 
 about:
   summary: "LoopTools: A package for evaluation of scalar and tensor one-loop integrals"
@@ -105,7 +108,7 @@ about:
     LoopTools is: T. Hahn, M. Pérez-Victoria. Automated one-loop calculations
     in four and D dimensions, _Comput. Phys. Commun._ 118 (1999) 153.
     DOI: [10.1016/S0010-4655(98)00173-8](https://doi.org/10.1016/S0010-4655(98)00173-8)
-  license: GPL-3.0-only
+  license: LGPL-3.0-only
   license_file: COPYING
   homepage: https://feynarts.de/looptools/
 

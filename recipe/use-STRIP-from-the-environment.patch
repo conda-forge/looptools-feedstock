@@ -1,0 +1,32 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Matthew Feickert <matthew.feickert@cern.ch>
+Date: Thu, 1 Oct 2026 16:55:32 -0600
+Subject: [PATCH] Use STRIP from the environment
+
+The bare 'strip' found on PATH is the build machine's, which can not
+handle the target's binaries when cross-compiling. Use the STRIP that the
+compiler activation exports instead.
+---
+ makefile.in | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/makefile.in b/makefile.in
+index 103bae5..7700e47 100644
+--- a/makefile.in
++++ b/makefile.in
+@@ -48,13 +48,13 @@ install: lib frontend
+ 	-mkdir $(LIBDIR) $(BINDIR) $(INCLUDEDIR)
+ 	cp -p $(BLD)/$(LIB) $(LIBDIR)
+ 	cp -p $(INCLUDE) $(INCLUDEDIR)
+-	strip $(BLD)/$(FE)
++	$(STRIP) $(BLD)/$(FE)
+ 	cp -p $(BLD)/$(FCC) $(BLD)/$(FE) $(BINDIR)
+ 	rm -f $(BINDIR)/$(FXX)
+ 	ln -s $(FCC) $(BINDIR)/$(FXX)
+ 	test ! -f $(BLD)/$(MFE) || { \
+ 	  test -z "$(EXE)" || ldd $(BLD)/$(MFE) | awk '/\/usr\/bin\/cyg/ { system("cp -p " $$3 " $(BINDIR)/"); }' ; \
+-	  strip $(BLD)/$(MFE) ; \
++	  $(STRIP) $(BLD)/$(MFE) ; \
+ 	  cp -p $(BLD)/$(MFE) $(BINDIR); \
+ 	}
+ 
