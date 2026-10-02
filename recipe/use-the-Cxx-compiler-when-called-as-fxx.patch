@@ -1,0 +1,29 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Matthew Feickert <matthew.feickert@cern.ch>
+Date: Thu, 1 Oct 2026 18:37:04 -0600
+Subject: [PATCH] Use the C++ compiler when called as f++
+
+The '+' characters in the regular expression are not escaped, so it
+matches one or more 'f' at the end of the name and never matches 'f++'.
+f++ then behaves as fcc and uses the C compiler, unless a source file has
+the .cc extension or -lstdc++ is given.
+
+Match on the file name with a pattern instead, which also covers
+f++-quad, the name that f++ is installed under for a build with --quad.
+---
+ src/tools/fcc.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/tools/fcc.in b/src/tools/fcc.in
+index 2247212..7e4dd26 100755
+--- a/src/tools/fcc.in
++++ b/src/tools/fcc.in
+@@ -18,7 +18,7 @@ cc="${REALCC:-cc}"
+ cc+=" $cdefs"
+ cxx="${REALCXX:-c++}"
+ cxx+=" $cdefs"
+-[[ "${0%.in}" =~ f++$ ]] && cc="$cxx"
++[[ "${0##*/}" == f++* ]] && cc="$cxx"
+ 
+ while test $# -gt 0; do
+   printf -v arg "%q" "$1"
