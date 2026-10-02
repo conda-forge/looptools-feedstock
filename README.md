@@ -3,13 +3,9 @@ About looptools-feedstock
 
 Feedstock license: [BSD-3-Clause](https://github.com/conda-forge/looptools-feedstock/blob/main/LICENSE.txt)
 
-
-About looptools
----------------
-
 Home: https://feynarts.de/looptools/
 
-Package license: GPL-3.0-only
+Package license: LGPL-3.0-only
 
 Summary: LoopTools: A package for evaluation of scalar and tensor one-loop integrals
 
@@ -22,32 +18,19 @@ The [publication](https://inspirehep.net/literature/474106) associated with
 LoopTools is: T. Hahn, M. Pérez-Victoria. Automated one-loop calculations
 in four and D dimensions, _Comput. Phys. Commun._ 118 (1999) 153.
 DOI: [10.1016/S0010-4655(98)00173-8](https://doi.org/10.1016/S0010-4655(98)00173-8)
-
-About looptools
----------------
-
-Home: https://feynarts.de/looptools/
-
-Package license: GPL-3.0-only
-
-Summary: LoopTools: A package for evaluation of scalar and tensor one-loop integrals
-
-LoopTools is a package for evaluation of scalar and tensor one-loop integrals
-based on the FF package by G.J. van Oldenborgh. It features an easy Fortran,
-C++, and Mathematica interface to the scalar one-loop functions of FF and
-in addition provides the 2-, 3-, and 4-point tensor coefficient functions.
-
-The [publication](https://inspirehep.net/literature/474106) associated with
-LoopTools is: T. Hahn, M. Pérez-Victoria. Automated one-loop calculations
-in four and D dimensions, _Comput. Phys. Commun._ 118 (1999) 153.
-DOI: [10.1016/S0010-4655(98)00173-8](https://doi.org/10.1016/S0010-4655(98)00173-8)
-
 
 Current build status
 ====================
 
 
-<table>
+<table><tr>
+    <td>GitHub Actions</td>
+    <td>
+      <a href="https://github.com/conda-forge/looptools-feedstock/actions/workflows/conda-build.yml">
+        <img src="https://github.com/conda-forge/looptools-feedstock/actions/workflows/conda-build.yml/badge.svg?event=push&branch=main">
+      </a>
+    </td>
+  </tr>
     
   <tr>
     <td>Azure</td>
@@ -61,27 +44,6 @@ Current build status
         <table>
           <thead><tr><th>Variant</th><th>Status</th></tr></thead>
           <tbody><tr>
-              <td>linux_64</td>
-              <td>
-                <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=24047&branchName=main">
-                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/looptools-feedstock?branchName=main&jobName=linux&configuration=linux%20linux_64_" alt="variant">
-                </a>
-              </td>
-            </tr><tr>
-              <td>linux_aarch64</td>
-              <td>
-                <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=24047&branchName=main">
-                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/looptools-feedstock?branchName=main&jobName=linux&configuration=linux%20linux_aarch64_" alt="variant">
-                </a>
-              </td>
-            </tr><tr>
-              <td>linux_ppc64le</td>
-              <td>
-                <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=24047&branchName=main">
-                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/looptools-feedstock?branchName=main&jobName=linux&configuration=linux%20linux_ppc64le_" alt="variant">
-                </a>
-              </td>
-            </tr><tr>
               <td>osx_64</td>
               <td>
                 <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=24047&branchName=main">
@@ -93,13 +55,6 @@ Current build status
               <td>
                 <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=24047&branchName=main">
                   <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/looptools-feedstock?branchName=main&jobName=osx&configuration=osx%20osx_arm64_" alt="variant">
-                </a>
-              </td>
-            </tr><tr>
-              <td>win_64</td>
-              <td>
-                <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=24047&branchName=main">
-                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/looptools-feedstock?branchName=main&jobName=win&configuration=win%20win_64_" alt="variant">
                 </a>
               </td>
             </tr>
@@ -127,31 +82,73 @@ conda config --add channels conda-forge
 conda config --set channel_priority strict
 ```
 
-Once the `conda-forge` channel has been enabled, `looptools-static` can be installed with `conda`:
+How to use
+----------
+
+<details>
+<summary>With conda</summary>
 
 ```
 conda install looptools-static
 ```
 
-or with `mamba`:
+</details>
+
+<details>
+<summary>With mamba</summary>
 
 ```
 mamba install looptools-static
 ```
 
-It is possible to list all of the versions of `looptools-static` available on your platform with `conda`:
+</details>
+
+<details>
+<summary>With pixi</summary>
+
+```
+# for adding to your local project
+pixi add looptools-static
+# for installing globally
+pixi global install looptools-static
+```
+
+</details>
+
+Search package versions
+-----------------------
+
+It is possible to list all of the versions of `looptools-static` available on your platform:
+
+<details>
+<summary>With conda</summary>
 
 ```
 conda search looptools-static --channel conda-forge
 ```
 
-or with `mamba`:
+</details>
+
+<details>
+<summary>With mamba</summary>
 
 ```
 mamba search looptools-static --channel conda-forge
 ```
 
-Alternatively, `mamba repoquery` may provide more information:
+</details>
+
+<details>
+<summary>With pixi</summary>
+
+```
+pixi search looptools-static --channel conda-forge
+```
+
+</details>
+
+<details>
+<summary>With mamba repoquery, which may provide more information</summary>
 
 ```
 # Search all versions available on your platform:
@@ -163,6 +160,8 @@ mamba repoquery whoneeds looptools-static --channel conda-forge
 # List dependencies of `looptools-static`:
 mamba repoquery depends looptools-static --channel conda-forge
 ```
+
+</details>
 
 
 About conda-forge
