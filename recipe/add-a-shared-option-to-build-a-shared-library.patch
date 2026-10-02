@@ -1,0 +1,126 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Matthew Feickert <matthew.feickert@cern.ch>
+Date: Thu, 1 Oct 2026 22:06:22 -0600
+Subject: [PATCH] Add a --shared option to build a shared library
+
+LoopTools only builds the static libooptools.a. With --shared, configure
+sets up the build of libooptools.so (libooptools.dylib on macOS) in its
+place, which the lt frontend is then linked against.
+
+The Fortran header looptools.h declares the common block ltvars, and the
+cache macros (Aval, Bval, ...) index memory relative to its address, so a
+program and the library have to use the same copy of it. On Linux the
+dynamic linker takes care of this. On macOS a program gets its own copy
+by default, so its link step needs -Wl,-commons,use_dylibs, which is
+added to LDFLAGS for lt and for fcc.
+---
+ configure    | 29 +++++++++++++++++++++++++++++
+ makefile.in  |  3 ++-
+ src/makefile |  4 ++++
+ 3 files changed, 35 insertions(+), 1 deletion(-)
+
+diff --git a/configure b/configure
+index 96e4642..7a62fdf 100755
+--- a/configure
++++ b/configure
+@@ -19,6 +19,9 @@ CONF_TARGET=
+ CONF_STATIC=
+ CONF_STATIC_EXT=
+ CONF_STATIC_GFORTRAN=
++CONF_SHARED=
++CONF_LIBEXT=.a
++CONF_SHLDFLAGS=
+ CONF_QUAD=
+ CONF_QUADSIZE=16
+ CONF_REAL10=
+@@ -51,6 +54,8 @@ for arg in "$@" ; do
+ 	test "$CONF_OS" = Darwin &&
+ 	  CONF_STATIC_EXT=1 ||
+ 	  CONF_STATIC="-static" ;;
++  --shared)
++	CONF_SHARED=1 ;;
+   --quad)
+ 	CONF_QUAD=1 ;;
+   --real10)
+@@ -78,6 +83,8 @@ $0 understands the following options:
+ 	target host triplet, e.g. i386-pc-linux
+ --static
+ 	link the executables statically
++--shared
++	build a shared instead of a static library
+ --quad
+ 	compile with quadruple precision (ifort, gfortran 4.6+, xlf only)
+ --real10
+@@ -233,6 +240,25 @@ ${CXXFLAGS-${CONF_DEBUG:--O3 -g} -fomit-frame-pointer -ffast-math -fPIC -Wall} \
+ $CONF_STATIC ${CONF_STATIC_GCC:+-static-libstdc++ -static-libgcc}"
+ 
+ 
++## how to build a shared library
++
++test -n "$CONF_SHARED" && {
++  CONF_FFLAGS+=" -fPIC"
++  CONF_CFLAGS+=" -fPIC"
++  case "$CONF_OS" in
++  Darwin)
++    CONF_LIBEXT=.dylib
++    CONF_SHLDFLAGS=" -dynamiclib -Wl,-install_name,@rpath/\$(LIB)"
++    # A program that declares the common blocks of looptools.h otherwise
++    # gets its own copy of them, and not the one the library uses
++    CONF_LDFLAGS+=" -Wl,-commons,use_dylibs" ;;
++  *)
++    CONF_LIBEXT=.so
++    CONF_SHLDFLAGS=" -shared -Wl,-soname,\$(LIB)" ;;
++  esac
++}
++
++
+ ## does Fortran append underscores to symbols?
+ 
+ echo -n "does $CONF_FC append underscores... " 1>&3
+@@ -443,6 +469,9 @@ MCLIBS =$CONF_MCLIBS
+ 
+ LDFLAGS =$CONF_LDFLAGS
+ 
++LIBEXT = $CONF_LIBEXT
++SHLDFLAGS =$CONF_SHLDFLAGS
++
+ PARALLEL = $CONF_PARALLEL
+ 
+ # --- end defs by configure ---
+diff --git a/makefile.in b/makefile.in
+index 7700e47..d655842 100644
+--- a/makefile.in
++++ b/makefile.in
+@@ -4,7 +4,7 @@ LIBDIR = $(PREFIX)/lib$(LIBDIRSUFFIX)
+ INCLUDEDIR = $(PREFIX)/include
+ BINDIR = $(PREFIX)/bin
+ 
+-LIB = libooptools$(QUADSUFFIX).a
++LIB = libooptools$(QUADSUFFIX)$(LIBEXT)
+ FE = lt$(QUADSUFFIX)$(EXE)
+ MFE = LoopTools$(QUADSUFFIX)$(EXE)
+ FCC = fcc$(QUADSUFFIX)
+@@ -37,6 +37,7 @@ ARGS = $(PARALLEL) \
+   NM="$(NM)" \
+   DLLTOOL="$(DLLTOOL)" \
+   LDFLAGS="$(LDFLAGS)" \
++  SHLDFLAGS="$(SHLDFLAGS)" \
+   LIBPATH="$(LIBPATH)"
+ 
+ 
+diff --git a/src/makefile b/src/makefile
+index 453bba9..89851c6 100644
+--- a/src/makefile
++++ b/src/makefile
+@@ -237,7 +237,11 @@ ffbndc.o: ffbndc.F $(FFINC)
+ 	$(XFC) -c -o ffbndc.o ffbndc.F
+ 
+ $(LIB): $(OBJS)
++ifeq ($(SHLDFLAGS),)
+ 	$(AR) $(ARFLAGS) $(LIB) $?
++else
++	$(XFC) $(SHLDFLAGS) -o $(LIB) $(OBJS) $(LDFLAGS)
++endif
+ 
+ 
+ $(FE): lt.F $(LTINC) $(LIB)
