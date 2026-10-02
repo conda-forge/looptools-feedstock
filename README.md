@@ -70,6 +70,8 @@ Current release info
 
 | Name | Downloads | Version | Platforms |
 | --- | --- | --- | --- |
+| [![Conda Recipe](https://img.shields.io/badge/recipe-looptools-green.svg)](https://anaconda.org/conda-forge/looptools) | [![Conda Downloads](https://img.shields.io/conda/dn/conda-forge/looptools.svg)](https://anaconda.org/conda-forge/looptools) | [![Conda Version](https://img.shields.io/conda/vn/conda-forge/looptools.svg)](https://anaconda.org/conda-forge/looptools) | [![Conda Platforms](https://img.shields.io/conda/pn/conda-forge/looptools.svg)](https://anaconda.org/conda-forge/looptools) |
+| [![Conda Recipe](https://img.shields.io/badge/recipe-looptools--devel-green.svg)](https://anaconda.org/conda-forge/looptools-devel) | [![Conda Downloads](https://img.shields.io/conda/dn/conda-forge/looptools-devel.svg)](https://anaconda.org/conda-forge/looptools-devel) | [![Conda Version](https://img.shields.io/conda/vn/conda-forge/looptools-devel.svg)](https://anaconda.org/conda-forge/looptools-devel) | [![Conda Platforms](https://img.shields.io/conda/pn/conda-forge/looptools-devel.svg)](https://anaconda.org/conda-forge/looptools-devel) |
 | [![Conda Recipe](https://img.shields.io/badge/recipe-looptools--static-green.svg)](https://anaconda.org/conda-forge/looptools-static) | [![Conda Downloads](https://img.shields.io/conda/dn/conda-forge/looptools-static.svg)](https://anaconda.org/conda-forge/looptools-static) | [![Conda Version](https://img.shields.io/conda/vn/conda-forge/looptools-static.svg)](https://anaconda.org/conda-forge/looptools-static) | [![Conda Platforms](https://img.shields.io/conda/pn/conda-forge/looptools-static.svg)](https://anaconda.org/conda-forge/looptools-static) |
 
 Installing looptools
@@ -89,7 +91,7 @@ How to use
 <summary>With conda</summary>
 
 ```
-conda install looptools-static
+conda install looptools looptools-devel looptools-static
 ```
 
 </details>
@@ -98,7 +100,7 @@ conda install looptools-static
 <summary>With mamba</summary>
 
 ```
-mamba install looptools-static
+mamba install looptools looptools-devel looptools-static
 ```
 
 </details>
@@ -108,9 +110,9 @@ mamba install looptools-static
 
 ```
 # for adding to your local project
-pixi add looptools-static
+pixi add looptools looptools-devel looptools-static
 # for installing globally
-pixi global install looptools-static
+pixi global install looptools looptools-devel looptools-static
 ```
 
 </details>
@@ -118,13 +120,13 @@ pixi global install looptools-static
 Search package versions
 -----------------------
 
-It is possible to list all of the versions of `looptools-static` available on your platform:
+It is possible to list all of the versions of `looptools` available on your platform:
 
 <details>
 <summary>With conda</summary>
 
 ```
-conda search looptools-static --channel conda-forge
+conda search looptools --channel conda-forge
 ```
 
 </details>
@@ -133,7 +135,7 @@ conda search looptools-static --channel conda-forge
 <summary>With mamba</summary>
 
 ```
-mamba search looptools-static --channel conda-forge
+mamba search looptools --channel conda-forge
 ```
 
 </details>
@@ -142,7 +144,7 @@ mamba search looptools-static --channel conda-forge
 <summary>With pixi</summary>
 
 ```
-pixi search looptools-static --channel conda-forge
+pixi search looptools --channel conda-forge
 ```
 
 </details>
@@ -152,13 +154,13 @@ pixi search looptools-static --channel conda-forge
 
 ```
 # Search all versions available on your platform:
-mamba repoquery search looptools-static --channel conda-forge
+mamba repoquery search looptools --channel conda-forge
 
-# List packages depending on `looptools-static`:
-mamba repoquery whoneeds looptools-static --channel conda-forge
+# List packages depending on `looptools`:
+mamba repoquery whoneeds looptools --channel conda-forge
 
-# List dependencies of `looptools-static`:
-mamba repoquery depends looptools-static --channel conda-forge
+# List dependencies of `looptools`:
+mamba repoquery depends looptools --channel conda-forge
 ```
 
 </details>
