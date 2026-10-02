@@ -1,0 +1,53 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Matthew Feickert <matthew.feickert@cern.ch>
+Date: Thu, 1 Oct 2026 17:52:39 -0600
+Subject: [PATCH] Link the Fortran runtime by name
+
+FLDFLAGS is scraped from the verbose output of the Fortran compiler's link
+step, so it holds absolute paths into the build environment, including
+the compiler version, and libraries that are internal to the compiler.
+These get written into the installed fcc script, where they do not exist
+at install time. As LDFLAGS already has the library search path, keep
+only the names of the Fortran runtime libraries that the compiler links.
+libquadmath is among them on the platforms where REAL*16 needs it.
+
+On macOS the C compiler that fcc calls is clang, which does not link the
+GCC runtime that the Fortran compiler links from its own directory. The
+REAL*16 arithmetic (__addtf3, ...) is in it, so link the shared GCC
+runtime there.
+---
+ configure | 16 ++++------------
+ 1 file changed, 4 insertions(+), 12 deletions(-)
+
+diff --git a/configure b/configure
+index 7bb6321..1200bee 100755
+--- a/configure
++++ b/configure
+@@ -208,23 +208,15 @@ while read line ; do
+   [[ "$1" =~ (/collect2|/ld|^ld)$CONF_EXE$ ]] && while test $# -gt 1 ; do
+     shift
+     case "$1" in
+-    *.o | -lc*)
+-      ;;
+-    -l* | -L* | *.a)
++    -lgfortran | -lquadmath | -lm)
+       FLDFLAGS+=" $1" ;;
+-    -Bstatic | -Bdynamic | *.ld)
+-      FLDFLAGS+=" -Wl,$1" ;;
+-    /*)
+-      FLDFLAGS+=" -L$1" ;;
+-    -rpath*)
+-      FLDFLAGS+=" -Wl,$1,$2"
+-      shift ;;
+-    -dynamic-linker)
+-      shift ;;
+     esac
+   done
+ done < <(eval $CONF_FC$CONF_FFLAGS -v -o $test $test.f 2>&1)
+ 
++# clang does not link the GCC runtime, which has the REAL*16 arithmetic
++test "$CONF_OS" = Darwin && FLDFLAGS+=" -lgcc_s.1.1"
++
+ eval setflags LDFLAGS "$LDFLAGS $CONF_LDFLAGS $FLDFLAGS"
+ 
+ echo "ok" 1>&3
