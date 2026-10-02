@@ -20,7 +20,7 @@ source:
     - add-a-shared-option-to-build-a-shared-library.patch
 
 build:
-  number: 8
+  number: 9
   skip: win
 
 outputs:
@@ -52,10 +52,9 @@ outputs:
         - sed
       run:
         # fcc requires the existence of a C and C++ compiler to work
-        - if: linux
-          then: gxx
-        - if: osx
-          then: clangxx
+        # Ensure minimally activated compiler series
+        # c.f. https://github.com/conda-forge/conda-forge.github.io/issues/2595
+        - cxx-compiler >=2.0.0
 
     tests:
       - package_contents:
