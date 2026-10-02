@@ -15,9 +15,11 @@ source:
     - link-the-Fortran-runtime-by-name.patch
     - link-the-REAL-16-check-with-LDFLAGS.patch
     - pass-all-five-point-arguments-from-EgetC.patch
+    - use-the-Cxx-compiler-when-called-as-fxx.patch
+    - do-not-add-stdlib-libstdc-when-MathLink-is-not-found.patch
 
 build:
-  number: 6
+  number: 7
   skip: win
 
 outputs:
@@ -67,6 +69,9 @@ outputs:
       - files:
           recipe:
             - examples/
+        requirements:
+          run:
+            - grep
         script:
           - lt 1
           # The three-, four-, and five-point tensor coefficients use REAL*16
@@ -76,6 +81,9 @@ outputs:
           # configure falls back to double precision without an error if its
           # check for REAL*16 fails
           - grep -e "-DQUADSIZE=16" $PREFIX/bin/fcc
+          # configure adds -stdlib=libstdc++ to the C++ compiler flags of fcc
+          # if its check for MathLink is left unpatched, which is wrong for macOS
+          - if grep -e "-stdlib=libstdc++" $PREFIX/bin/fcc; then exit 1; fi
           - fcc --help
           - f++ --help
 
@@ -92,6 +100,14 @@ outputs:
           - ./example01-fcc
           - fcc example02.c -o example02 -looptools
           - ./example02
+          # example03 needs the C++ standard library, so links only if the C++
+          # compiler is used. f++ uses it for any source file and fcc only for
+          # a source file with the .cc extension.
+          - f++ example03.cpp -o example03 -looptools
+          - ./example03
+          - cp example03.cpp example03.cc
+          - fcc example03.cc -o example03-fcc -looptools
+          - ./example03-fcc
           # libooptools.a is linked into shared libraries by downstream packages,
           # so it must be position independent
           - $CXX -shared -fPIC example01.cpp -o libexample01.so $CXXFLAGS $LDFLAGS -looptools -lgfortran
